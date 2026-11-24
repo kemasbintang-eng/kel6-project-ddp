@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+pydantic
+Pillow>=11
+python-multipart>=0.0.22
+torch>=2.6
+torchvision
+transformers>=4.49,<5

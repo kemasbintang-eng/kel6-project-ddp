@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Lost & Found</title>
+    <meta name="theme-color" content="#174e3c">
+    <meta name="description" content="Temukan barang yang hilang dan bantu kembalikan barang temuan di lingkungan Fasilkom UI.">
+    <style>
+        :root { color-scheme: light; --bg: #f8f9f6; --paper: #fff; --ink: #243c33; --muted: #69776f; --green: #174e3c; --green-hover: #103b2d; --green-soft: #edf4ee; --line: #e2e7df; --orange: #a94e26; --orange-soft: #fff0e7; --radius: 18px; }
+        *, *::before, *::after { box-sizing: border-box; }
+        html { scroll-behavior: smooth; scroll-padding-top: 28px; }
+        body { margin: 0; background: var(--bg); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 14px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+        button, input, select, textarea { font: inherit; }
+        button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+        button, select { cursor: pointer; }
+        button { color: inherit; }
+        button:disabled { cursor: wait; opacity: .65; }
+        a { color: inherit; text-decoration: none; }
+        button, a { touch-action: manipulation; }
+        h1, h2, h3, p { margin: 0; }
+        svg { flex-shrink: 0; }
+        [hidden] { display: none !important; }
+        :focus-visible { outline: 3px solid #85ad4a; outline-offset: 4px; }
+        ::selection { background: #d7e8bb; color: var(--green); }
+        .icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+        .skip-link { position: fixed; top: -80px; left: 16px; z-index: 20; padding: 12px 20px; background: var(--green); color: white; border-radius: 8px; }
+        .skip-link:focus { top: 12px; }
+        .container { width: min(1240px, calc(100% - 80px)); margin-inline: auto; }
+        .site-header { background: var(--paper); border-bottom: 1px solid var(--line); }
+        .header-inner { min-height: 94px; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand-mark { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 13px; color: #e9f0cd; background: var(--green); }
+        .brand-mark .icon { width: 26px; height: 26px; }
+        .brand-name { display: block; font-size: 19px; font-weight: 750; letter-spacing: -.7px; line-height: 1.25; }
+        .brand-subtitle { display: block; color: var(--muted); font-size: 10px; font-weight: 650; letter-spacing: 2.1px; margin-top: 3px; }
+        .header-nav { display: flex; align-items: center; gap: 30px; margin-left: auto; }
+        .header-nav a { font-size: 13px; font-weight: 600; color: var(--muted); padding: 10px 0; }
+        .header-nav a:hover, .header-nav a.active { color: var(--green); }
+        .header-nav a.active { box-shadow: inset 0 -2px var(--green); }
+        .faculty-identity { border-left: 1px solid var(--line); padding-left: 28px; flex-shrink: 0; }
+        /* AREA LOGO FAKULTAS: ukuran logo mengikuti kotak ini, tanpa terpotong. */
+        .faculty-logo { width: 132px; height: 55px; display: grid; place-items: center; }
+        .faculty-logo img { display: block; width: 100%; height: 100%; object-fit: contain; }
+        .logo-placeholder { width: 100%; height: 100%; border: 1px dashed #b8c5b7; border-radius: 9px; display: flex; align-items: center; justify-content: center; gap: 8px; color: #71816e; background: #fafbf8; }
+        .logo-placeholder .icon { width: 23px; height: 23px; }
+        .logo-placeholder span { font-size: 9px; font-weight: 650; line-height: 1.6; letter-spacing: 1.3px; }
+        main { padding-top: 32px; padding-bottom: 64px; }
+        .hero { border: 1px solid #dfe6d7; border-radius: 24px; background: #edf1e6; overflow: hidden; position: relative; }
+        .hero-main { display: grid; grid-template-columns: 1.3fr 1fr; gap: 56px; padding: 38px 44px 34px; align-items: center; }
+        .eyebrow { display: flex; align-items: center; gap: 8px; color: var(--green); font-size: 10px; font-weight: 750; letter-spacing: 1.9px; text-transform: uppercase; }
+        .eyebrow::before { content: ""; width: 6px; height: 6px; background: #5e823c; border-radius: 50%; }
+        .hero h1 { font-size: clamp(36px, 4.1vw, 54px); line-height: 1.08; letter-spacing: -2.5px; font-weight: 750; margin: 16px 0; }
+        .hero h1 span { color: #668348; }
+        .hero-copy { color: #5f6e5c; max-width: 440px; font-size: 14px; line-height: 1.8; }
+        .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 13px; margin-top: 24px; }
+        .button { border: 1px solid transparent; border-radius: 9px; padding: 11px 17px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 9px; font-weight: 650; font-size: 12px; transition: background .18s, border-color .18s; }
+        .button .icon { width: 17px; height: 17px; }
+        .button-primary { background: var(--green); color: white; }
+        .button-primary:hover { background: var(--green-hover); }
+        .button-secondary { background: #ffffffa3; color: var(--green); border-color: #d7decd; }
+        .button-secondary:hover { background: white; border-color: #a5b795; }
+        .guide { position: relative; padding: 25px 27px; background: #ffffffb3; border: 1px solid #fff; border-radius: 18px; }
+        .guide-sticker { position: absolute; top: -18px; right: 20px; width: 48px; height: 48px; border: 4px solid #edf1e6; border-radius: 50%; background: #d9e8ac; display: grid; place-items: center; transform: rotate(12deg); color: var(--green); }
+        .guide-label { color: #718263; font-size: 10px; font-weight: 750; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 17px; }
+        .guide ol { list-style: none; padding: 0; margin: 0; display: grid; gap: 17px; }
+        .guide li { display: flex; align-items: center; gap: 13px; }
+        .step-number { width: 30px; height: 30px; flex-shrink: 0; border: 1px solid #dfe6d6; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 650; color: #6d805d; }
+        .guide h3 { font-size: 12px; font-weight: 650; }
+        .guide p { font-size: 11px; color: var(--muted); margin-top: 1px; }
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); background: #ffffff70; border-top: 1px solid #dce3d2; padding: 19px 24px; }
+        .stat { display: flex; align-items: center; gap: 12px; padding: 0 20px; border-right: 1px solid #dce3d2; }
+        .stat:last-child { border-right: 0; }
+        .stat-icon { color: #758a66; display: grid; place-items: center; }
+        .stat strong { font-size: 24px; font-weight: 700; letter-spacing: -.8px; line-height: 1.2; }
+        .stat span { display: block; color: #69765e; font-size: 10px; margin-top: 1px; }
+        .board-header { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin: 35px 0 22px; }
+        .section-kicker { font-size: 10px; letter-spacing: 1.7px; font-weight: 700; color: #7a856f; text-transform: uppercase; margin-bottom: 5px; }
+        .board-header h2 { font-size: 26px; line-height: 1.3; letter-spacing: -.9px; font-weight: 700; }
+        .board-header > p { font-size: 12px; color: var(--muted); text-align: right; }
+        .workspace { display: grid; grid-template-columns: 326px minmax(0, 1fr); gap: 28px; align-items: start; }
+        .report-panel { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+        .panel-heading { padding: 22px 22px 19px; border-bottom: 1px solid #edf0e9; display: flex; align-items: flex-start; gap: 12px; }
+        .panel-heading > .icon { margin-top: 3px; color: var(--green); }
+        .panel-heading h2 { font-size: 16px; font-weight: 700; letter-spacing: -.4px; }
+        .panel-heading p { font-size: 11px; color: var(--muted); margin-top: 2px; }
+        .report-form { padding: 20px 22px 22px; }
+        .field { margin-bottom: 15px; }
+        .field label, .report-type legend { display: block; margin-bottom: 6px; font-size: 11px; font-weight: 650; }
+        .field label span { color: #889080; font-size: 10px; font-weight: 400; }
+        input, select, textarea { width: 100%; min-width: 0; background: #fff; border: 1px solid #dce3d8; border-radius: 8px; color: var(--ink); padding: 10px 12px; min-height: 42px; font-size: 12px; transition: border-color .2s, box-shadow .2s; }
+        input::placeholder, textarea::placeholder { color: #879080; opacity: 1; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #719262; box-shadow: 0 0 0 3px #eaf0e3; }
+        textarea { resize: vertical; min-height: 86px; display: block; }
+        select { padding-right: 28px; }
+        .report-type { margin: 0 0 17px; padding: 0; border: 0; }
+        .type-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .type-option { position: relative; cursor: pointer; }
+        .type-option input { position: absolute; opacity: 0; width: 1px; height: 1px; min-height: 0; }
+        .type-option span { display: flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid var(--line); border-radius: 8px; padding: 10px 4px; font-size: 11px; font-weight: 600; color: var(--muted); transition: .18s; }
+        .type-option .icon { width: 16px; height: 16px; }
+        .type-option input:checked + span { background: var(--green-soft); border-color: #8aa77c; color: var(--green); }
+        .type-option input:focus-visible + span { outline: 3px solid #85ad4a; outline-offset: 3px; }
+        .form-hint { display: flex; align-items: flex-start; gap: 7px; font-size: 10px; color: var(--muted); margin: 17px 0; line-height: 1.7; }
+        .form-hint .icon { width: 14px; height: 14px; margin-top: 2px; }
+        .submit-button { width: 100%; }
+        .submit-button .icon { margin-left: auto; }
+        .form-feedback { padding: 10px 12px; border-radius: 8px; font-size: 12px; margin-top: 12px; background: var(--green-soft); color: var(--green); }
+        .form-feedback.error { background: var(--orange-soft); color: #923a22; }
+        .community-note { display: flex; gap: 11px; padding: 17px 9px; color: #74806c; }
+        .community-note .icon { width: 18px; height: 18px; margin-top: 2px; }
+        .community-note p { font-size: 11px; line-height: 1.7; }
+        .community-note strong { color: #5a6b52; font-weight: 650; }
+        .list-panel { min-width: 0; }
+        .search-row { display: flex; gap: 10px; }
+        .search-box { position: relative; flex: 1; min-width: 0; }
+        .search-box > .icon { position: absolute; left: 15px; top: 14px; width: 18px; height: 18px; color: #829078; pointer-events: none; }
+        .search-box input { height: 47px; padding: 11px 43px; border-radius: 10px; }
+        .clear-search { position: absolute; right: 5px; top: 5px; border: 0; background: transparent; display: grid; place-items: center; width: 37px; height: 37px; border-radius: 7px; color: var(--muted); }
+        .clear-search:hover { background: var(--green-soft); }
+        .clear-search .icon { width: 15px; height: 15px; }
+        .category-filter { width: 167px; height: 47px; border-radius: 10px; font-size: 11px; }
+        .filter-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 17px 0; }
+        .filter-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+        .filter-tab { border: 1px solid transparent; background: transparent; color: #71806b; border-radius: 7px; padding: 7px 11px; font-size: 11px; font-weight: 600; min-height: 36px; }
+        .filter-tab:hover { background: #eef1e9; }
+        .filter-tab[aria-pressed="true"] { background: var(--green); color: white; }
+        .filter-tab .dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #cc825b; margin-right: 5px; vertical-align: 2px; }
+        .filter-tab .dot.found { background: #7e9b5f; }
+        .result-count { color: #7c8775; font-size: 10px; white-space: nowrap; }
+        .items-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
+        .item-card { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 19px; min-width: 0; display: flex; flex-direction: column; transition: border-color .2s, box-shadow .2s; }
+        .item-card:hover { border-color: #bdccb2; box-shadow: 0 5px 18px #2c4c2b08; }
+        .item-card.resolved { background: #fcfdfb; }
+        .card-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 15px; }
+        .item-category-icon { width: 41px; height: 41px; border-radius: 11px; display: grid; place-items: center; background: #f1f3ed; color: #748666; }
+        .item-category-icon .icon { width: 22px; height: 22px; }
+        .badge { display: inline-flex; align-items: center; gap: 5px; border-radius: 5px; padding: 4px 7px; font-size: 9px; font-weight: 650; }
+        .badge::before { content: ""; width: 4px; height: 4px; border-radius: 50%; background: currentColor; }
+        .badge-lost { background: var(--orange-soft); color: var(--orange); }
+        .badge-found { background: #edf4e8; color: #4c702e; }
+        .badge-custody { background: #fff2d6; color: #75501b; }
+        .badge-resolved { background: #eef0ec; color: #727b6a; }
+        .item-category { font-size: 9px; font-weight: 600; color: #7a876f; letter-spacing: .7px; text-transform: uppercase; margin-bottom: 4px; }
+        .item-card h3 { font-size: 16px; letter-spacing: -.4px; font-weight: 700; line-height: 1.4; overflow-wrap: anywhere; }
+        .item-description { font-size: 11px; color: var(--muted); line-height: 1.8; margin: 8px 0 14px; white-space: pre-line; overflow-wrap: anywhere; }
+        .item-meta { display: grid; gap: 6px; margin-top: auto; padding-bottom: 15px; color: #73806b; font-size: 10px; }
+        .item-meta > div { display: flex; gap: 7px; align-items: flex-start; }
+        .item-meta .icon { width: 13px; height: 13px; margin-top: 2px; }
+        .item-meta span { overflow-wrap: anywhere; }
+        .card-actions { display: flex; align-items: center; gap: 8px; justify-content: space-between; padding-top: 13px; border-top: 1px solid #edf0e9; }
+        .contact-button { border: 1px solid #e0e8d9; background: #f3f6ef; color: var(--green); border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 10px; min-height: 36px; font-size: 10px; font-weight: 650; }
+        .contact-button:hover { background: #e8efdf; }
+        .contact-button .icon { width: 14px; height: 14px; }
+        .text-button { border: 0; background: none; padding: 8px 0 8px 5px; min-height: 36px; font-size: 10px; font-weight: 550; color: #6d7d61; }
+        .text-button:hover { color: var(--green); text-decoration: underline; }
+        .contact-details { margin-top: 11px; padding: 10px 12px; border-radius: 8px; background: #f3f6ef; font-size: 11px; color: var(--green); overflow-wrap: anywhere; }
+        .contact-details strong { display: block; margin-top: 2px; user-select: all; }
+        .item-photo { display: block; width: 100%; height: 165px; object-fit: contain; border-radius: 9px; background: #f1f3ed; margin-bottom: 13px; }
+        .photo-input { padding: 8px; }
+        .photo-input::file-selector-button { border: 0; border-radius: 5px; background: var(--green-soft); padding: 5px 8px; margin-right: 8px; color: var(--green); font: inherit; cursor: pointer; }
+        .photo-hint { margin-top: 6px; font-size: 11px; color: var(--muted); }
+        .photo-preview { margin-top: 9px; max-width: 100%; max-height: 140px; border-radius: 8px; }
+        .match-results { margin-top: 13px; padding: 12px; border-radius: 8px; background: #f2f5ed; font-size: 11px; color: #41583d; overflow-wrap: anywhere; }
+        .match-results ul { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 6px; }
+        .match-results button { display: flex; width: 100%; gap: 8px; align-items: center; padding: 7px; border: 1px solid var(--line); border-radius: 7px; background: var(--paper); text-align: left; }
+        .match-results button:hover { border-color: #8aa77c; }
+        .match-results button img { width: 42px; height: 42px; object-fit: contain; border-radius: 5px; background: #f1f3ed; flex-shrink: 0; }
+        .match-results button small { display: block; color: var(--muted); font-size: 10px; }
+        .resolved-note { display: flex; align-items: center; gap: 5px; color: #6c7b61; font-size: 10px; }
+        .resolved-note .icon { width: 14px; height: 14px; }
+        .empty-state { grid-column: 1 / -1; min-height: 310px; border: 1px dashed #d9e1d1; border-radius: var(--radius); background: #ffffff8c; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 35px 24px; text-align: center; }
+        .empty-icon { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 20px; color: #82916b; background: #eef2e6; margin-bottom: 16px; }
+        .empty-icon .icon { width: 28px; height: 28px; }
+        .empty-state h3 { font-size: 17px; letter-spacing: -.4px; }
+        .empty-state p { max-width: 310px; font-size: 12px; color: var(--muted); margin: 6px 0 18px; }
+        .list-note { display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 10px; color: #849079; margin-top: 23px; }
+        .list-note .icon { width: 13px; height: 13px; }
+        .footer-inner { border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 23px 0; color: #7c8872; font-size: 10px; }
+        .footer-inner strong { color: #5e7154; font-weight: 650; }
+        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 30; width: max-content; max-width: calc(100% - 32px); background: var(--green); color: white; border-radius: 12px; padding: 13px 18px; font-size: 12px; box-shadow: 0 8px 30px #174e3c25; }
+        .toast.error { background: #8e4026; }
+        .resolution-details { margin-top: 12px; padding: 11px 12px; background: #f0f4eb; border-radius: 8px; color: #526647; font-size: 11px; }
+        .resolution-details span { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; }
+        .report-reference { margin-top: 10px; font-size: 10px; color: var(--muted); overflow-wrap: anywhere; }
+        .report-reference code { user-select: all; }
+        .modal { width: min(480px, calc(100% - 32px)); max-height: calc(100dvh - 40px); overflow-y: auto; padding: 28px; border: 1px solid var(--line); border-radius: 20px; color: var(--ink); background: var(--paper); box-shadow: 0 24px 80px #102b2a30; }
+        .modal::backdrop { background: #17382f80; backdrop-filter: blur(3px); }
+        .modal-icon { display: grid; place-items: center; width: 46px; height: 46px; background: var(--green-soft); border-radius: 13px; color: var(--green); margin-bottom: 15px; }
+        .modal h2 { font-size: 22px; line-height: 1.3; letter-spacing: -.6px; }
+        .modal-intro { color: var(--muted); font-size: 12px; margin: 10px 0 20px; }
+        .modal-item { color: var(--green); display: block; overflow-wrap: anywhere; margin-top: 4px; }
+        .modal .field label { font-size: 12px; }
+        .modal input:not([type="checkbox"]), .modal select { font-size: 16px; }
+        .modal-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+        .check-label { display: flex; align-items: flex-start; gap: 10px; margin-top: 18px; font-size: 12px; cursor: pointer; }
+        .check-label input { flex-shrink: 0; width: 17px; height: 17px; min-height: 0; margin: 2px 0 0; accent-color: var(--green); }
+        .modal .form-feedback { margin-bottom: 12px; }
+        .modal button:disabled { cursor: not-allowed; }
+        @media (max-width: 480px) { .modal { padding: 23px; } }
+        @media (max-width: 1100px) {
+            .container { width: calc(100% - 48px); }
+            .workspace { grid-template-columns: 292px minmax(0, 1fr); gap: 22px; }
+            .hero-main { gap: 32px; padding: 32px; }
+            .item-card { padding: 16px; }
+            .items-grid { gap: 12px; }
+            .card-actions { flex-wrap: wrap; }
+            .filter-row { align-items: flex-start; flex-direction: column; gap: 7px; }
+            .category-filter { width: 145px; }
+        }
+        @media (max-width: 900px) {
+            .header-nav { gap: 20px; }
+            .header-nav a:last-child { display: none; }
+            .hero-main { grid-template-columns: 1.15fr 1fr; gap: 24px; padding: 30px; }
+            .hero h1 { font-size: 42px; letter-spacing: -1.9px; }
+            .guide { padding: 23px 19px; }
+            .hero-actions { gap: 8px; }
+            .hero-actions .button { padding-inline: 12px; font-size: 11px; }
+            .stats { padding-inline: 10px; }
+            .stat { padding: 0 13px; }
+            .stat-icon { display: none; }
+            .items-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 700px) {
+            .container { width: calc(100% - 32px); }
+            .header-inner { min-height: 82px; gap: 12px; }
+            .header-nav { display: none; }
+            .brand-name { font-size: 17px; }
+            .brand-subtitle { font-size: 8px; letter-spacing: 1.6px; }
+            .brand-mark { width: 37px; height: 37px; border-radius: 11px; }
+            .brand-mark .icon { width: 22px; height: 22px; }
+            .faculty-identity { padding-left: 15px; }
+            .faculty-logo { width: 103px; height: 47px; }
+            .logo-placeholder span { font-size: 8px; letter-spacing: 1px; }
+            main { padding-top: 20px; padding-bottom: 35px; }
+            .hero { border-radius: 19px; }
+            .hero-main { grid-template-columns: 1fr; padding: 26px; gap: 32px; }
+            .hero h1 { font-size: 45px; }
+            .hero-copy { font-size: 13px; max-width: 360px; }
+            .guide ol { gap: 13px; }
+            .guide { padding: 20px; }
+            .stats { grid-template-columns: repeat(2, 1fr); row-gap: 18px; padding: 19px 13px; }
+            .stat { padding-left: 15px; }
+            .stat:nth-child(2) { border-right: 0; }
+            .stat-icon { display: grid; }
+            .stat strong { font-size: 23px; }
+            .board-header { margin-top: 29px; }
+            .board-header h2 { font-size: 24px; }
+            .board-header > p { display: none; }
+            .workspace { display: flex; flex-direction: column; gap: 28px; }
+            .report-column { order: 2; width: 100%; }
+            .list-panel { order: 1; width: 100%; }
+            .items-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .filter-row { flex-direction: row; align-items: center; }
+            .report-form { padding: 22px; }
+            .field label, .report-type legend { font-size: 12px; }
+            input, select, textarea, .search-box input { font-size: 16px; }
+            .category-filter { font-size: 16px; width: 155px; }
+            .footer-inner { flex-direction: column; align-items: flex-start; gap: 4px; }
+        }
+        @media (max-width: 480px) {
+            .brand { gap: 8px; }
+            .brand-name { font-size: 16px; }
+            .faculty-identity { padding-left: 10px; }
+            .faculty-logo { width: 85px; }
+            .logo-placeholder { gap: 5px; }
+            .logo-placeholder .icon { width: 18px; height: 18px; }
+            .hero-main { padding: 25px 22px; }
+            .hero h1 { font-size: 41px; }
+            .hero-actions .button { font-size: 11px; padding-inline: 10px; }
+            .hero-actions { flex-wrap: wrap; }
+            .hero-actions .icon { width: 14px; height: 14px; }
+            .eyebrow { font-size: 8px; letter-spacing: 1.5px; }
+            .guide { padding-inline: 16px; }
+            .search-row { flex-direction: column; }
+            .category-filter { width: 100%; height: 43px; }
+            .items-grid { grid-template-columns: 1fr; }
+            .item-card { padding: 20px; }
+            .item-description { font-size: 12px; }
+            .item-meta, .contact-button, .text-button { font-size: 11px; }
+            .filter-row { flex-wrap: wrap; }
+            .filter-tab { padding-inline: 10px; }
+            .result-count { margin-left: 2px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after { transition: none !important; animation: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <a class="skip-link" href="#papan-laporan">Langsung ke daftar laporan</a>
+    <svg xmlns="http://www.w3.org/2000/svg" class="sr-only" aria-hidden="true">
+        <symbol id="i-box" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z M3 8v9l9 5 9-5V8 M12 13v9 M7.5 5.5l9 5"/></symbol>
+        <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></symbol>
+        <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14 M5 12h14"/></symbol>
+        <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16 m-6-6 6 6-6 6"/></symbol>
+        <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+        <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol>
+        <symbol id="i-pin" viewBox="0 0 24 24"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 0 1 14 0Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+        <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+        <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 10 10 0 0 1-4-.8L3 21l1.8-5.5a10 10 0 0 1-.8-4A8.5 8.5 0 0 1 12.5 3H13a8.5 8.5 0 0 1 8 8v.5Z M8 10h8 M8 14h5"/></symbol>
+        <symbol id="i-building" viewBox="0 0 24 24"><path d="m3 9 9-6 9 6H3Z M5 10v9 M10 10v9 M14 10v9 M19 10v9 M3 21h18"/></symbol>
+        <symbol id="i-heart" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0l-1 1-1-1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/></symbol>
+        <symbol id="i-shield" viewBox="0 0 24 24"><path d="m12 3 8 4v5c0 5-8 9-8 9s-8-4-8-9V7l8-4Z m-4 9 3 3 5-6"/></symbol>
+        <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3 2.4 6.6L21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4L12 3Z M20 2v4 M18 4h4"/></symbol>
+        <symbol id="i-laptop" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="12" rx="2"/><path d="m4 16-2 4h20l-2-4 M10 17h4"/></symbol>
+        <symbol id="i-bottle" viewBox="0 0 24 24"><path d="M9 3h6v4l2 3v10a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V10l2-3V3Z M9 7h6 M7 12h10 M7 17h10"/></symbol>
+        <symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8" cy="11" r="2"/><path d="M5.5 16c0-3 5-3 5 0 M14 10h4 M14 14h3"/></symbol>
+        <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="8" r="5"/><path d="m12 12 9 9 M16 16l3-3 M18 18l3-3 M6.5 6.5h.01"/></symbol>
+        <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12 M6 18 18 6"/></symbol>
+        <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5 M4 17v-5h5 M6 6a8 8 0 0 1 14 6 M18 18a8 8 0 0 1-14-6"/></symbol>
+    </svg>
+
+    <header class="site-header">
+        <div class="container header-inner">
+            <a class="brand" href="#" aria-label="Campus Lost and Found, beranda">
+                <span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="#i-box"/></svg></span>
+                <span><span class="brand-name">Campus<span style="color:#82956c">.</span></span><span class="brand-subtitle">LOST &amp; FOUND</span></span>
+            </a>
+            <nav class="header-nav" aria-label="Navigasi utama">
+                <a class="active" href="#papan-laporan">Papan laporan</a>
+                <a href="#panduan">Cara kerja</a>
+                <a href="#laporkan">Buat laporan <span aria-hidden="true">↗</span></a>
+            </nav>
+            <div class="faculty-identity">
+                <div class="faculty-logo" aria-label="Area logo fakultas">
+                    <!-- LOGO FAKULTAS: ganti seluruh div.logo-placeholder di bawah dengan:
+                         <img src="URL_LOGO_FAKULTAS" alt="Logo Fakultas Ilmu Komputer Universitas Indonesia" width="132" height="55">
+                         Gunakan URL gambar yang dapat diakses browser (atau data URI).
+                         Jika memakai file lokal, pastikan folder gambar dilayani oleh server web.
+                    -->
+                    <div class="logo-placeholder" role="img" aria-label="Tempat logo fakultas">
+                        <svg class="icon" aria-hidden="true"><use href="#i-building"/></svg>
+                        <span>LOGO<br>FAKULTAS</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero" aria-labelledby="hero-title">
+            <div class="hero-main">
+                <div>
+                    <p class="eyebrow">Ruang saling bantu · Fasilkom UI</p>
+                    <h1 id="hero-title">Yang hilang,<br><span>bisa kembali.</span></h1>
+                    <p class="hero-copy">Kehilangan sesuatu atau menemukan barang di kampus? Yuk, bantu barang berharga kembali ke pemiliknya.</p>
+                    <div class="hero-actions">
+                        <a class="button button-primary" href="#papan-laporan" id="findItemLink"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>Cari barang saya</a>
+                        <a class="button button-secondary" href="#laporkan" id="reportFoundLink"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Laporkan temuan</a>
+                    </div>
+                </div>
+                <aside class="guide" id="panduan" aria-label="Cara kerja">
+                    <div class="guide-sticker"><svg class="icon" aria-hidden="true"><use href="#i-heart"/></svg></div>
+                    <h2 class="guide-label">Sedikit usaha, besar artinya.</h2>
+                    <ol>
+                        <li><span class="step-number">01</span><div><h3>Cari atau buat laporan</h3><p>Ceritakan barang dan lokasi kejadiannya.</p></div></li>
+                        <li><span class="step-number">02</span><div><h3>Lihat kemungkinan cocok</h3><p>Sistem otomatis membandingkan foto atau keterangan laporan.</p></div></li>
+                        <li><span class="step-number">03</span><div><h3>Verifikasi &amp; kembalikan</h3><p>Catat pos satpam jika barang dititipkan, lalu tutup laporan saat barang sudah diambil.</p></div></li>
+                    </ol>
+                </aside>
+            </div>
+            <div class="stats" aria-label="Ringkasan seluruh laporan">
+                <div class="stat"><div class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-box"/></svg></div><div><strong id="statTotal">—</strong><span>Total laporan</span></div></div>
+                <div class="stat"><div class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg></div><div><strong id="statLost">—</strong><span>Masih dicari</span></div></div>
+                <div class="stat"><div class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg></div><div><strong id="statFound">—</strong><span>Temuan aktif</span></div></div>
+                <div class="stat"><div class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-check-circle"/></svg></div><div><strong id="statResolved">—</strong><span>Laporan selesai</span></div></div>
+            </div>
+        </section>
+
+        <div class="board-header" id="papan-laporan">
+            <div><p class="section-kicker">Papan laporan kampus</p><h2>Temukan yang kamu cari.</h2></div>
+            <p>Satu laporan bisa membuat perbedaan.</p>
+        </div>
+        <div class="workspace">
+            <aside class="report-column" id="laporkan">
+                <section class="report-panel" aria-labelledby="form-title">
+                    <div class="panel-heading"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg><div><h2 id="form-title">Buat laporan baru</h2><p>Isi detailnya, biar lebih mudah ditemukan.</p></div></div>
+                    <form id="reportForm" class="report-form">
+                        <fieldset class="report-type">
+                            <legend>Apa yang ingin kamu laporkan?</legend>
+                            <div class="type-options">
+                                <label class="type-option"><input id="report_type" type="radio" name="report_type" value="LOST" checked><span><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>Saya kehilangan</span></label>
+                                <label class="type-option"><input id="report_type_found" type="radio" name="report_type" value="FOUND"><span><svg class="icon" aria-hidden="true"><use href="#i-box"/></svg>Saya menemukan</span></label>
+                            </div>
+                        </fieldset>
+                        <div class="field"><label for="title">Nama barang</label><input type="text" id="title" name="title" required placeholder="Contoh: Tumbler hitam" maxlength="120"></div>
+                        <div class="field"><label for="category">Kategori</label><select id="category" name="category" required><option value="" disabled selected>Pilih kategori barang</option><option>Elektronik</option><option>Botol / Tumbler</option><option>Dokumen / KTM</option><option>Kunci / Aksesoris</option><option>Lainnya</option></select></div>
+                        <div class="field"><label for="location">Lokasi kejadian</label><input type="text" id="location" name="location" required placeholder="Contoh: Gedung Baru, ruang A05.54" maxlength="160"></div>
+                        <div class="field"><label for="description">Ciri-ciri barang</label><textarea id="description" name="description" required rows="3" placeholder="Warna, merek, stiker, atau ciri khusus lainnya…" maxlength="2000"></textarea></div>
+                        <div class="field">
+                            <label for="reportPhoto">Foto barang <span>· Opsional</span></label>
+                            <input type="file" id="reportPhoto" class="photo-input" accept="image/jpeg,image/png,image/webp" aria-describedby="photoHint">
+                            <p id="photoHint" class="photo-hint">JPG, PNG, atau WebP, maksimal 8 MB. Foto akan tampil di papan laporan. Tutupi data pribadi pada barang.</p>
+                            <img id="photoPreview" class="photo-preview" alt="Pratinjau foto barang" hidden>
+                        </div>
+                        <div class="field"><label for="contact">Kontak <span>· WhatsApp / ID LINE</span></label><input type="text" id="contact" name="contact" required placeholder="Nomor WhatsApp atau ID LINE" maxlength="120" aria-describedby="contact-hint"></div>
+                        <p class="form-hint" id="contact-hint"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg>Kontakmu akan tampil di laporan.</p>
+                        <button type="submit" id="submitReport" class="button button-primary submit-button"><span>Kirim laporan</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+                        <p id="formFeedback" class="form-feedback" role="status" hidden></p>
+                    </form>
+                </section>
+                <div class="community-note"><svg class="icon" aria-hidden="true"><use href="#i-heart"/></svg><p><strong>Kebaikan kecil, dampak besar.</strong><br>Terima kasih sudah saling menjaga di kampus.</p></div>
+            </aside>
+
+            <section class="list-panel" aria-label="Daftar laporan barang">
+                <div class="search-row">
+                    <div class="search-box"><label class="sr-only" for="searchInput">Cari nama barang, ciri-ciri, atau lokasi</label><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input type="search" id="searchInput" placeholder="Cari barang atau lokasi…" autocomplete="off"><button class="clear-search" id="clearSearch" type="button" aria-label="Hapus pencarian" hidden><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div>
+                    <label class="sr-only" for="filterCategory">Filter kategori barang</label><select id="filterCategory" class="category-filter"><option value="">Semua kategori</option><option>Elektronik</option><option>Botol / Tumbler</option><option>Dokumen / KTM</option><option>Kunci / Aksesoris</option><option>Lainnya</option></select>
+                </div>
+                <div class="filter-row">
+                    <div class="filter-tabs" id="filterType" role="group" aria-label="Filter jenis laporan">
+                        <button type="button" class="filter-tab" data-filter="" aria-pressed="true">Semua</button>
+                        <button type="button" class="filter-tab" data-filter="LOST" aria-pressed="false"><span class="dot" aria-hidden="true"></span>Hilang</button>
+                        <button type="button" class="filter-tab" data-filter="FOUND" aria-pressed="false"><span class="dot found" aria-hidden="true"></span>Ditemukan</button>
+                        <button type="button" class="filter-tab" data-filter="SECURITY" aria-pressed="false">Di pos satpam</button>
+                        <button type="button" class="filter-tab" data-filter="RESOLVED" aria-pressed="false">Selesai</button>
+                    </div>
+                    <p class="result-count" id="resultCount" role="status" aria-live="polite">Memuat laporan…</p>
+                </div>
+                <div id="itemsList" class="items-grid" aria-busy="true"></div>
+                <p class="list-note"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Laporan terbaru ditampilkan lebih dulu.</p>
+            </section>
+        </div>
+        <noscript><p class="form-feedback error">Aktifkan JavaScript untuk melihat dan membuat laporan.</p></noscript>
+    </main>
+
+    <footer><div class="container footer-inner"><p><strong>Campus Lost &amp; Found</strong> <span aria-hidden="true">/</span> Fasilkom Universitas Indonesia</p><p>Dari kita, untuk sesama warga kampus.</p></div></footer>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+    <dialog id="resolveDialog" class="modal" aria-labelledby="resolveDialogTitle" aria-describedby="resolveDialogDescription">
+        <div class="modal-icon"><svg class="icon" aria-hidden="true"><use href="#i-check-circle"/></svg></div>
+        <h2 id="resolveDialogTitle">Perbarui status laporan</h2>
+        <p class="modal-intro" id="resolveDialogDescription">Pilih status yang sesuai dengan keadaan barang.<strong class="modal-item" id="resolveItemTitle"></strong></p>
+        <p class="report-reference">ID laporan: <code id="resolveItemId"></code></p>
+        <form id="resolveForm">
+            <div class="field" style="margin-top:18px"><label for="resolutionReason">Status barang</label><select id="resolutionReason" required><option value="" selected disabled>Pilih status</option><option value="SECURITY">Dititipkan ke satpam</option><option value="RETURNED">Barang sudah dikembalikan</option><option value="FOUND_SELF" id="foundSelfOption">Sudah ditemukan sendiri</option><option value="CANCELLED">Laporan dibatalkan</option></select></div>
+            <div id="custodyField" class="field" hidden>
+                <label for="custodyLocation">Pos satpam / lokasi penitipan</label>
+                <input id="custodyLocation" type="text" placeholder="Contoh: Pos Satpam Gerbang Utama" maxlength="160" disabled>
+            </div>
+            <label class="check-label"><input type="checkbox" id="resolutionConfirmed" required><span id="resolutionConfirmationText">Saya memastikan alasan yang dipilih sudah benar.</span></label>
+            <p id="resolutionFeedback" class="form-feedback error" role="alert" hidden></p>
+            <div class="modal-actions"><button type="button" id="cancelResolution" class="button button-secondary">Batal</button><button type="submit" id="submitResolution" class="button button-primary">Simpan status</button></div>
+        </form>
+    </dialog>
+    <script>
+        const $ = (id) => document.getElementById(id);
+        const icon = (name) => `<svg class="icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
+        const escapeHTML = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        })[char]);
+        const categoryIcons = {
+            'Elektronik': 'laptop', 'Botol / Tumbler': 'bottle',
+            'Dokumen / KTM': 'card', 'Kunci / Aksesoris': 'key', 'Lainnya': 'box'
+        };
+        let allItems = [];
+        let activeFilter = '';
+        let loadState = 'loading';
+        let loadSequence = 0;
+        let toastTimer;
+        let resolutionItemId = null;
+        let resolutionTrigger = null;
+        const resolutionLabels = {
+            RETURNED: 'Barang sudah dikembalikan', FOUND_SELF: 'Ditemukan sendiri', CANCELLED: 'Laporan dibatalkan'
+        };
+
+        async function requestJSON(url, options = {}, timeoutMs = 15000) {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const response = await fetch(url, { ...options, signal: controller.signal });
+                if (!response.ok) {
+                    const payload = await response.json().catch(() => ({}));
+                    const error = new Error(typeof payload.detail === 'string' ? payload.detail : 'Permintaan belum berhasil. Periksa isian dan coba lagi.');
+                    error.status = response.status;
+                    throw error;
+                }
+                return await response.json();
+            } finally {
+                clearTimeout(timeout);
+            }
+        }
+
+        function showToast(message, isError = false) {
+            clearTimeout(toastTimer);
+            $('toast').textContent = message;
+            $('toast').classList.toggle('error', isError);
+            $('toast').hidden = false;
+            toastTimer = setTimeout(() => { $('toast').hidden = true; }, 5000);
+        }
+
+        function showFormFeedback(message, isError = false) {
+            $('formFeedback').textContent = message;
+            $('formFeedback').classList.toggle('error', isError);
+            $('formFeedback').hidden = false;
+        }
+
+        function formatDate(value) {
+            if (!value) return 'Tanggal tidak tersedia';
+            let timestamp = String(value).replace(' ', 'T');
+            // Timestamp lama tidak memiliki offset; data aplikasi memakai WIB.
+            if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(timestamp)) timestamp += '+07:00';
+            const date = new Date(timestamp);
+            if (Number.isNaN(date.getTime())) return String(value);
+            return new Intl.DateTimeFormat('id-ID', {
+                day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta'
+            }).format(date);
+        }
+
+        function updateStats() {
+            const stats = {
+                statTotal: allItems.length,
+                statLost: allItems.filter((item) => item.report_type === 'LOST' && !item.is_resolved).length,
+                statFound: allItems.filter((item) => item.report_type === 'FOUND' && !item.is_resolved).length,
+                statResolved: allItems.filter((item) => item.is_resolved).length
+            };
+            Object.entries(stats).forEach(([id, value]) => {
+                $(id).textContent = loadState === 'ready' ? value.toLocaleString('id-ID') : '—';
+            });
+        }
+
+        function emptyState(symbol, title, description, action = '') {
+            return `<div class="empty-state"><div class="empty-icon">${icon(symbol)}</div>
+                <h3>${title}</h3><p>${description}</p>${action}</div>`;
+        }
+
+        function photoUrl(id) {
+            return `/api/items/${encodeURIComponent(id)}/photo`;
+        }
+
+        function renderMatches(matches) {
+            if (!matches.length) return '<p class="match-results">Belum ada kemungkinan cocok.</p>';
+            return `<div class="match-results"><strong>Kemungkinan cocok</strong><ul>${matches.map((match) => `
+                <li><button type="button" data-action="view-match" data-target="${escapeHTML(match.id)}">
+                    ${match.has_photo ? `<img src="${photoUrl(match.id)}" alt="" loading="lazy">` : ''}
+                    <span><strong>${escapeHTML(match.title)}</strong>
+                        <small>${match.custody_location ? 'Pos satpam: ' + escapeHTML(match.custody_location) : escapeHTML(match.location)} · ${match.match_basis === 'photo' ? 'Foto mirip' : 'Keterangan mirip'}</small>
+                    </span>
+                </button></li>`).join('')}</ul></div>`;
+        }
+
+        function renderItems() {
+            const container = $('itemsList');
+            const keyword = $('searchInput').value.trim().toLocaleLowerCase('id-ID');
+            const category = $('filterCategory').value;
+            $('clearSearch').hidden = !$('searchInput').value;
+            container.setAttribute('aria-busy', String(loadState === 'loading'));
+
+            if (loadState === 'loading') {
+                $('resultCount').textContent = 'Memuat laporan…';
+                container.innerHTML = emptyState('refresh', 'Sebentar, ya…', 'Sedang mengambil laporan terbaru dari kampus.');
+                return;
+            }
+            if (loadState === 'error') {
+                $('resultCount').textContent = 'Gagal memuat laporan';
+                container.innerHTML = emptyState('refresh', 'Laporan belum bisa dimuat',
+                    'Periksa koneksi dan pastikan server aplikasi berjalan, lalu coba lagi.',
+                    `<button type="button" class="button button-secondary" data-action="retry">${icon('refresh')}Coba lagi</button>`);
+                return;
+            }
+
+            const items = allItems.filter((item) => {
+                const matchesType = !activeFilter ||
+                    (activeFilter === 'RESOLVED' && item.is_resolved) ||
+                    (!item.is_resolved && (activeFilter === 'SECURITY' ? Boolean(item.custody_location) : item.report_type === activeFilter));
+                const matchesCategory = !category || item.category === category;
+                const matchesKeyword = !keyword || [item.title, item.description, item.location]
+                    .some((value) => String(value ?? '').toLocaleLowerCase('id-ID').includes(keyword));
+                return matchesType && matchesCategory && matchesKeyword;
+            });
+            $('resultCount').textContent = `${items.length} laporan`;
+
+            if (!items.length) {
+                const hasFilters = keyword || category || activeFilter;
+                container.innerHTML = hasFilters
+                    ? emptyState('search', 'Belum ada yang cocok', 'Coba kata kunci lain atau tampilkan semua laporan.',
+                        '<button type="button" class="button button-secondary" data-action="reset">Hapus semua filter</button>')
+                    : emptyState('box', 'Belum ada laporan', 'Kehilangan atau menemukan sesuatu? Mulai dengan membuat laporan pertama.',
+                        `<a class="button button-secondary" href="#laporkan">${icon('plus')}Buat laporan</a>`);
+                return;
+            }
+
+            // Escape setiap nilai dari API sebelum menyisipkannya ke HTML.
+            container.innerHTML = items.map((item) => {
+                const id = escapeHTML(item.id);
+                const resolved = Boolean(item.is_resolved);
+                const lost = item.report_type === 'LOST';
+                const atSecurity = Boolean(item.custody_location) && !resolved;
+                const badge = resolved ? 'resolved' : atSecurity ? 'custody' : lost ? 'lost' : 'found';
+                const status = resolved ? (item.resolution_reason === 'CANCELLED' ? 'Dibatalkan' : 'Selesai')
+                    : atSecurity ? 'Dititipkan ke satpam' : lost ? 'Barang hilang' : 'Menunggu pemilik';
+                return `<article class="item-card${resolved ? ' resolved' : ''}" data-id="${id}">
+                    <div class="card-top">
+                        <div class="item-category-icon">${icon(categoryIcons[item.category] || 'box')}</div>
+                        <span class="badge badge-${badge}">${status}</span>
+                    </div>
+                    <p class="item-category">${escapeHTML(item.category)}</p>
+                    ${item.has_photo ? `<img class="item-photo" src="${photoUrl(item.id)}" alt="Foto ${escapeHTML(item.title)}" loading="lazy">` : ''}
+                    <h3 tabindex="-1">${escapeHTML(item.title)}</h3>
+                    <p class="item-description">${escapeHTML(item.description)}</p>
+                    <div class="item-meta">
+                        <div>${icon('pin')}<span>${escapeHTML(item.location)}</span></div>
+                        <div>${icon('clock')}<span>${escapeHTML(formatDate(item.created_at))}</span></div>
+                    </div>
+                    <div class="card-actions">
+                        <button type="button" class="contact-button" data-action="contact" aria-expanded="false" aria-controls="contact-${id}">${icon('chat')}<span>Lihat kontak</span></button>
+                        ${resolved ? `<span class="resolved-note">${icon('check-circle')}Sudah selesai</span>`
+                            : '<button type="button" class="text-button" data-action="resolve">Perbarui status</button>'}
+                    </div>
+                    ${resolved ? `<div class="resolution-details"><strong>${escapeHTML(resolutionLabels[item.resolution_reason] || 'Laporan selesai (data lama)')}</strong>${item.resolved_at ? `<span>Ditutup ${escapeHTML(formatDate(item.resolved_at))} WIB</span>` : '<span>Alasan dan waktu penutupan belum tercatat.</span>'}</div>` : ''}
+                    ${atSecurity ? `<div class="resolution-details"><strong>Ambil di ${escapeHTML(item.custody_location)}</strong>
+                        ${item.custody_at ? `<span>Dititipkan ${escapeHTML(formatDate(item.custody_at))} WIB</span>` : ''}
+                    </div>` : ''}
+                    <p class="report-reference">ID: <code>${id}</code></p>
+                    <div class="contact-details" id="contact-${id}" hidden>WhatsApp / ID LINE<strong>${escapeHTML(item.contact)}</strong></div>
+                    ${!resolved ? renderMatches(item.matches || []) : ''}
+                </article>`;
+            }).join('');
+        }
+
+        async function fetchItems({ quiet = false } = {}) {
+            const sequence = ++loadSequence;
+            if (!quiet) {
+                loadState = 'loading';
+                renderItems();
+            }
+            try {
+                // API mengembalikan laporan terbaru terlebih dahulu.
+                // Filter lokal membuat pencarian langsung merespons tanpa request per ketikan.
+                const items = await requestJSON('/api/items?include_matches=true');
+                if (!Array.isArray(items)) throw new Error('Format laporan tidak valid');
+                if (sequence !== loadSequence) return false;
+                if (quiet && JSON.stringify(allItems) === JSON.stringify(items)) return true;
+                allItems = items;
+                loadState = 'ready';
+            } catch {
+                if (sequence !== loadSequence) return false;
+                if (quiet) return false;
+                loadState = 'error';
+            }
+            updateStats();
+            renderItems();
+            return loadState === 'ready';
+        }
+
+        function setFilter(value) {
+            activeFilter = value;
+            document.querySelectorAll('[data-filter]').forEach((button) => {
+                button.setAttribute('aria-pressed', String(button.dataset.filter === value));
+            });
+            renderItems();
+        }
+
+        function resetFilters() {
+            $('searchInput').value = '';
+            $('filterCategory').value = '';
+            setFilter('');
+        }
+
+        let previewUrl;
+        function clearPhotoPreview() {
+            if (previewUrl) URL.revokeObjectURL(previewUrl);
+            previewUrl = undefined;
+            $('photoPreview').hidden = true;
+            $('photoPreview').removeAttribute('src');
+        }
+
+        $('reportPhoto').addEventListener('change', () => {
+            clearPhotoPreview();
+            const input = $('reportPhoto');
+            input.setCustomValidity('');
+            const photo = input.files[0];
+            if (!photo) return;
+            if (photo.size > 8 * 1024 * 1024) {
+                input.setCustomValidity('Ukuran foto maksimal 8 MB.');
+                input.reportValidity();
+                return;
+            }
+            previewUrl = URL.createObjectURL(photo);
+            $('photoPreview').src = previewUrl;
+            $('photoPreview').hidden = false;
+        });
+
+        $('reportForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const button = $('submitReport');
+            if (button.disabled) return;
+            const payload = Object.fromEntries(new FormData(form));
+            for (const [name, value] of Object.entries(payload)) {
+                payload[name] = value.trim();
+                if (!payload[name]) {
+                    form.elements[name].setCustomValidity('Bagian ini tidak boleh kosong.');
+                    form.elements[name].reportValidity();
+                    return;
+                }
+            }
+            button.disabled = true;
+            const photo = $('reportPhoto').files[0];
+            button.querySelector('span').textContent = photo ? 'Memproses foto…' : 'Mengirim laporan…';
+            form.setAttribute('aria-busy', 'true');
+            $('formFeedback').hidden = true;
+            try {
+                if (photo) {
+                    const upload = new FormData();
+                    upload.set('report', JSON.stringify(payload));
+                    upload.set('photo', photo);
+                    await requestJSON('/api/items/with-photo', { method: 'POST', body: upload }, 60000);
+                } else {
+                    await requestJSON('/api/items', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                    });
+                }
+                form.reset();
+                clearPhotoPreview();
+                resetFilters();
+                showFormFeedback('Laporan berhasil dikirim.');
+                showToast('Laporan berhasil dikirim.');
+                const refreshed = await fetchItems();
+                if (!refreshed) showFormFeedback('Laporan sudah tersimpan. Klik “Coba lagi” pada daftar untuk memuatnya.');
+            } catch (error) {
+                showFormFeedback(error.status ? error.message : 'Laporan belum berhasil dikirim. Periksa koneksi, lalu coba lagi.', true);
+            } finally {
+                button.disabled = false;
+                button.querySelector('span').textContent = 'Kirim laporan';
+                form.setAttribute('aria-busy', 'false');
+            }
+        });
+
+        $('reportForm').addEventListener('input', (event) => {
+            if (typeof event.target.setCustomValidity === 'function') event.target.setCustomValidity('');
+        });
+
+        function openResolution(id, trigger) {
+            const item = allItems.find((report) => report.id === id);
+            if (!item || item.is_resolved) return;
+            resolutionItemId = id;
+            resolutionTrigger = trigger;
+            $('resolveForm').reset();
+            $('resolutionFeedback').hidden = true;
+            $('resolutionConfirmationText').textContent = 'Saya memastikan alasan yang dipilih sudah benar.';
+            $('resolveItemTitle').textContent = item.title;
+            $('resolveItemId').textContent = id;
+            $('foundSelfOption').hidden = item.report_type !== 'LOST';
+            $('foundSelfOption').disabled = item.report_type !== 'LOST';
+            $('custodyLocation').value = item.custody_location || '';
+            setCustodyField(false);
+            $('resolveDialog').showModal();
+        }
+
+        function setCustodyField(visible) {
+            $('custodyField').hidden = !visible;
+            $('custodyLocation').disabled = !visible;
+            $('custodyLocation').required = visible;
+        }
+
+        $('resolutionReason').addEventListener('change', () => {
+            setCustodyField($('resolutionReason').value === 'SECURITY');
+            const messages = {
+                SECURITY: 'Saya memastikan barang sudah diserahkan ke satpam di pos ini.',
+                RETURNED: 'Saya memastikan ciri khusus barang sudah diperiksa dan pemilik sudah menerima barangnya.',
+                FOUND_SELF: 'Saya adalah pelapor dan sudah menemukan kembali barang saya.',
+                CANCELLED: 'Saya ingin membatalkan laporan ini. Pembatalan tidak berarti barang sudah dikembalikan.'
+            };
+            $('resolutionConfirmationText').textContent = messages[$('resolutionReason').value];
+            $('resolutionConfirmed').checked = false;
+        });
+        function closeResolution() {
+            if (!$('submitResolution').disabled) $('resolveDialog').close();
+        }
+        $('cancelResolution').addEventListener('click', closeResolution);
+        $('resolveDialog').addEventListener('cancel', (event) => {
+            if ($('submitResolution').disabled) event.preventDefault();
+        });
+        $('resolveDialog').addEventListener('close', () => {
+            resolutionItemId = null;
+            if (resolutionTrigger?.isConnected) resolutionTrigger.focus({ preventScroll: true });
+        });
+        $('resolveForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const button = $('submitResolution');
+            if (button.disabled || !resolutionItemId) return;
+            const id = resolutionItemId;
+            const reason = $('resolutionReason').value;
+            const isCustody = reason === 'SECURITY';
+            const confirmed = $('resolutionConfirmed').checked;
+            const payload = isCustody ? { location: $('custodyLocation').value.trim(), confirmed } : { reason, confirmed };
+            if (isCustody && !payload.location) {
+                $('resolutionFeedback').textContent = 'Isi lokasi pos satpam tempat barang dititipkan.';
+                $('resolutionFeedback').hidden = false;
+                $('custodyLocation').focus();
+                return;
+            }
+            button.disabled = true;
+            button.textContent = 'Menyimpan…';
+            $('cancelResolution').disabled = true;
+            $('resolveForm').setAttribute('aria-busy', 'true');
+            $('resolutionFeedback').hidden = true;
+            try {
+                await requestJSON(`/api/items/${encodeURIComponent(id)}/${isCustody ? 'custody' : 'resolve'}`, {
+                    method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                $('resolveDialog').close();
+                showToast(isCustody ? 'Lokasi penitipan di pos satpam sudah disimpan.' : 'Laporan selesai.');
+                await fetchItems();
+                const card = Array.from(document.querySelectorAll('.item-card')).find((element) => element.dataset.id === id);
+                const focusTarget = card?.querySelector('[data-action="contact"]') || document.querySelector('[data-filter][aria-pressed="true"]');
+                focusTarget?.focus({ preventScroll: true });
+            } catch (error) {
+                $('resolutionFeedback').textContent = error.status ? error.message : 'Belum dapat terhubung ke server. Periksa koneksi dan coba lagi.';
+                $('resolutionFeedback').hidden = false;
+                if (isCustody) $('custodyLocation').focus();
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Simpan status';
+                $('cancelResolution').disabled = false;
+                $('resolveForm').setAttribute('aria-busy', 'false');
+            }
+        });
+
+        $('itemsList').addEventListener('click', (event) => {
+            const button = event.target.closest('button[data-action]');
+            if (!button || button.disabled) return;
+            const action = button.dataset.action;
+            if (action === 'retry') { fetchItems(); return; }
+            if (action === 'reset') { resetFilters(); $('searchInput').focus(); return; }
+            const card = button.closest('[data-id]');
+            if (!card) return;
+            const id = card.dataset.id;
+            if (action === 'resolve') openResolution(id, button);
+            if (action === 'view-match') {
+                const targetId = button.dataset.target;
+                resetFilters();
+                const match = Array.from(document.querySelectorAll('.item-card')).find((item) => item.dataset.id === targetId);
+                if (match) {
+                    match.querySelector('h3').focus({ preventScroll: true });
+                    match.scrollIntoView({ block: 'start' });
+                }
+            }
+            if (action === 'contact') {
+                const box = $(`contact-${id}`);
+                box.hidden = !box.hidden;
+                button.setAttribute('aria-expanded', String(!box.hidden));
+                button.querySelector('span').textContent = box.hidden ? 'Lihat kontak' : 'Tutup kontak';
+            }
+        });
+
+        $('filterType').addEventListener('click', (event) => {
+            const button = event.target.closest('[data-filter]');
+            if (button) setFilter(button.dataset.filter);
+        });
+        $('searchInput').addEventListener('input', renderItems);
+        $('filterCategory').addEventListener('change', renderItems);
+        $('clearSearch').addEventListener('click', () => {
+            $('searchInput').value = '';
+            renderItems();
+            $('searchInput').focus();
+        });
+        $('reportFoundLink').addEventListener('click', () => {
+            $('report_type_found').checked = true;
+            $('title').focus({ preventScroll: true });
+        });
+        $('findItemLink').addEventListener('click', () => {
+            resetFilters();
+            setFilter('FOUND');
+            $('searchInput').focus({ preventScroll: true });
+        });
+
+        fetchItems();
+        setInterval(() => {
+            if (!document.hidden && loadState === 'ready' && !document.querySelector('dialog[open]') &&
+                !$('itemsList').contains(document.activeElement)) {
+                fetchItems({ quiet: true });
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
